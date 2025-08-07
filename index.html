@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playtrace Analysis Tool</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <header>
@@ -32,10 +32,24 @@
                 <hr>
                 
                 <div class="analysis-controls">
-                    <label>
-                        <input type="checkbox" id="transform-checkbox">
-                        Apply Scalar Transformation
-                    </label>
+                    <div class="radio-group">
+                        <label>Analysis Method:</label>
+                        <label><input type="radio" name="analysis-method" value="frechet" checked> Overall Shape (Fréchet)</label>
+                        <label><input type="radio" name="analysis-method" value="dtw"> Sequence (DTW)</label>
+                        <label><input type="radio" name="analysis-method" value="combined"> Combined</label>
+                    </div>
+
+                    <div id="weights-container" class="hidden">
+                        <label for="frechet-weight-slider">Fréchet Weight: <span id="frechet-weight-value">0.5</span></label>
+                        <input type="range" id="frechet-weight-slider" min="0" max="1" value="0.5" step="0.05">
+                        
+                        <label for="dtw-weight-slider">DTW Weight: <span id="dtw-weight-value">0.5</span></label>
+                        <input type="range" id="dtw-weight-slider" min="0" max="1" value="0.5" step="0.05">
+                    </div>
+                    
+                    <label for="sensitivity-slider">Sensitivity: <span id="sensitivity-value">100</span></label>
+                    <input type="range" id="sensitivity-slider" min="30" max="300" value="100" step="10">
+
                     <button id="analyze-btn" disabled>Analyze</button>
                 </div>
             </section>
@@ -54,12 +68,17 @@
             <div id="results-list">
                 <!-- Results will be populated here -->
             </div>
+
+            <div id="chart-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span id="close-modal-btn" class="close-button">&times;</span>
+                    <h2 id="modal-title"></h2>
+                    <canvas id="comparison-chart" width="900" height="500"></canvas>
+                </div>
+            </div>
         </section>
     </main>
     
-    <!-- Fabric.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <!-- Main Application Script -->
-    <script src="main.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>
