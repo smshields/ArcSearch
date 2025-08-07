@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playtrace Analysis Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Playtrace Analysis Tool</h1>
+    </header>
+
+    <main class="container">
+        <div class="controls-and-canvas">
+            <section class="controls">
+                <h2>Controls</h2>
+                <p>1. Select your 'simulationfiles' directory.</p>
+                <input type="file" id="file-input" webkitdirectory directory>
+
+                <p>2. Select the root object containing the data array.</p>
+                <select id="root-object-selector" disabled></select>
+
+                <p>3. Select the Y-value to analyze.</p>
+                <select id="y-value-selector" disabled></select>
+
+                <p>4. Draw your desired graph shape below.</p>
+                <div class="drawing-controls">
+                    <button id="clear-canvas-btn">Clear Canvas</button>
+                </div>
+                
+                <hr>
+                
+                <div class="analysis-controls">
+                    <label>
+                        <input type="checkbox" id="transform-checkbox">
+                        Apply Scalar Transformation
+                    </label>
+                    <button id="analyze-btn" disabled>Analyze</button>
+                </div>
+            </section>
+
+            <section class="canvas-container">
+                <canvas id="drawing-canvas" width="600" height="400"></canvas>
+            </section>
+        </div>
+
+        <section class="results-area">
+            <h2>Analysis Results</h2>
+            <div id="progress-bar-container" class="hidden">
+                <div id="progress-bar"></div>
+                <span id="progress-text"></span>
+            </div>
+            <div id="results-list">
+                <!-- Results will be populated here -->
+            </div>
+        </section>
+    </main>
+    
+    <script src="main.js"></script>
+</body>
+</html>
