@@ -58,16 +58,17 @@ button:disabled, select:disabled {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Progress Bar Styles */
 .hidden {
     display: none;
 }
+
 #progress-bar-container {
     width: 100%;
     background-color: #ddd;
     border-radius: 5px;
     margin-bottom: 15px;
 }
+
 #progress-bar {
     width: 0%;
     height: 20px;
@@ -77,8 +78,15 @@ button:disabled, select:disabled {
     color: white;
     border-radius: 5px;
 }
+
 #progress-text {
     display: block;
     text-align: center;
     margin-top: 5px;
+}
+
+.drawing-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
 }
