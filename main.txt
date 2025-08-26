@@ -97,24 +97,20 @@ document.addEventListener('DOMContentLoaded', () => {
         fabricCanvas.freeDrawingBrush.width = 3;
 
         fabricCanvas.on('path:created', (e) => {
-            // The path object the user just drew.
-            const rawPathObject = e.path;
-            
-            // First, clear everything from the canvas. This enforces the single line rule
-            // and removes the raw (potentially illegal) path the user just drew.
-            fabricCanvas.clear();
-
-            const sanitizedPoints = sanitizePath(rawPathObject.path);
+            const userPath = e.path;
+            const existingPath = fabricCanvas.getObjects().find(o => o.id === 'user-drawn-path');
+            if (existingPath) {
+                fabricCanvas.remove(existingPath);
+            }
+            const sanitizedPoints = sanitizePath(userPath.path);
 
             if (sanitizedPoints.length > 1) {
                 const canvasHeight = fabricCanvas.height;
-                // Store the corrected data for analysis, inverting the Y-axis.
                 drawnPathData = sanitizedPoints.map(p => ({
                     x: p.x,
                     y: canvasHeight - p.y
                 }));
 
-                // Create a new, clean path object from the sanitized points.
                 const cleanPath = new fabric.Polyline(sanitizedPoints, {
                     id: 'user-drawn-path',
                     fill: null,
@@ -123,14 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectable: false,
                     evented: false,
                 });
-                // Add the new, clean path to the now-empty canvas.
                 fabricCanvas.add(cleanPath);
             } else {
-                // If the sanitized path is invalid, ensure our data store is empty.
                 drawnPathData = [];
             }
-            // After clearing and redrawing, re-add the scatter plot if it's supposed to be visible.
-            //updateCompositeScatterPlot();
+            fabricCanvas.remove(userPath);
         });
 
         window.addEventListener('resize', setCanvasSize);
@@ -144,18 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = command[command.length - 1];
             if (x > lastX) {
                 points.push({ x: x, y: y });
-                lastX = x;
             }
         });
         return points;
     }
 
     function clearCanvas() {
-        // The most reliable way to clear is to remove all objects.
-        fabricCanvas.clear();
+        const userPath = fabricCanvas.getObjects().find(o => o.id === 'user-drawn-path');
+        if (userPath) {
+            fabricCanvas.remove(userPath);
+        }
         drawnPathData = [];
-        // After clearing, re-add the scatter plot if it should be visible.
-        //updateCompositeScatterPlot();
     }
     
     async function drawCompositeScatterPlot() {
