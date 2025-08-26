@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const frechetWeightValue = document.getElementById('frechet-weight-value');
     const dtwWeightSlider = document.getElementById('dtw-weight-slider');
     const dtwWeightValue = document.getElementById('dtw-weight-value');
+    const scatterPlotToggle = document.getElementById('scatter-plot-toggle');
+    const scatterPlotCanvas = document.getElementById('composite-scatter-plot');
     
     let fullFileList = [];
     let sampleJsonContent = null;
@@ -28,10 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let drawnPathData = [];
     let fileContentCache = new Map();
     let comparisonChart = null;
+    let compositeChart = null;
 
     initializeCanvas();
     fileInput.addEventListener('change', handleDirectorySelect);
     rootObjectSelector.addEventListener('change', handleRootObjectSelect);
+    yValueSelector.addEventListener('change', handleYValueSelect);
     clearBtn.addEventListener('click', clearCanvas);
     analyzeBtn.addEventListener('click', startAnalysis);
     closeModalBtn.addEventListener('click', hideModal);
@@ -59,10 +63,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    scatterPlotToggle.addEventListener('change', updateCompositeScatterPlot);
 
 
     function initializeCanvas() {
+        scatterPlotToggle.disabled = true;
+        const canvasEl = document.getElementById('drawing-canvas');
+        const canvasContainer = document.querySelector('.canvas-stack');
+
+        const setCanvasSize = () => {
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+            
+            fabricCanvas.setDimensions({ width, height });
+            
+            scatterPlotCanvas.width = width;
+            scatterPlotCanvas.height = height;
+
+            if (compositeChart) {
+                compositeChart.resize();
+            }
+
+            fabricCanvas.renderAll();
+        };
+
         fabricCanvas = new fabric.Canvas('drawing-canvas');
+        setCanvasSize();
+
         fabricCanvas.isDrawingMode = true;
 
         fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(fabricCanvas);
@@ -71,7 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fabricCanvas.on('path:created', (e) => {
             const userPath = e.path;
-            clearCanvas();
+            const existingPath = fabricCanvas.getObjects().find(o => o.id === 'user-drawn-path');
+            if (existingPath) {
+                fabricCanvas.remove(existingPath);
+            }
             const sanitizedPoints = sanitizePath(userPath.path);
 
             if (sanitizedPoints.length > 1) {
@@ -82,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }));
 
                 const cleanPath = new fabric.Polyline(sanitizedPoints, {
+                    id: 'user-drawn-path',
                     fill: null,
                     stroke: '#e03131',
                     strokeWidth: 3,
@@ -94,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             fabricCanvas.remove(userPath);
         });
+
+        window.addEventListener('resize', setCanvasSize);
     }
 
     function sanitizePath(pathArray) {
@@ -110,8 +143,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearCanvas() {
-        fabricCanvas.clear();
+        const userPath = fabricCanvas.getObjects().find(o => o.id === 'user-drawn-path');
+        if (userPath) {
+            fabricCanvas.remove(userPath);
+        }
         drawnPathData = [];
+    }
+    
+    async function drawCompositeScatterPlot() {
+        clearCompositeScatterPlot();
+        if (fullFileList.length === 0 || !rootObjectSelector.value || !yValueSelector.value) {
+            return;
+        }
+
+        const rootKey = rootObjectSelector.value;
+        const yKey = yValueSelector.value;
+        const jsonFiles = fullFileList.filter(f => f.name.endsWith('.json') && f.webkitRelativePath.includes('/'));
+
+        let allPoints = [];
+        
+        const fileContents = await Promise.all(jsonFiles.map(readFileAsText));
+        
+        fileContents.forEach(file => {
+            try {
+                const jsonData = JSON.parse(file.content);
+                const dataArray = jsonData[rootKey];
+                if (dataArray && Array.isArray(dataArray)) {
+                    const pointsData = dataArray.map((obj, i) => ({
+                        x: i,
+                        y: parseFloat(obj[yKey]) || 0
+                    }));
+                    allPoints.push(...pointsData);
+                }
+            } catch (e) {
+                console.error(`Could not parse ${file.filename} for scatter plot: ${e.message}`);
+            }
+        });
+
+        if (allPoints.length === 0) return;
+        
+        scatterPlotCanvas.classList.remove('hidden');
+        const ctx = scatterPlotCanvas.getContext('2d');
+        
+        compositeChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    data: allPoints,
+                    pointRadius: 10,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 0.01)',
+                    pointBorderColor: 'transparent'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                events: []
+            }
+        });
+    }
+    
+    function clearCompositeScatterPlot() {
+        if (compositeChart) {
+            compositeChart.destroy();
+            compositeChart = null;
+        }
+        scatterPlotCanvas.classList.add('hidden');
+    }
+    
+    function updateCompositeScatterPlot() {
+        if (scatterPlotToggle.checked) {
+            drawCompositeScatterPlot();
+        } else {
+            clearCompositeScatterPlot();
+        }
     }
 
     function readFileAsText(file) {
@@ -156,6 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
         yValueSelector.innerHTML = '';
         yValueSelector.disabled = true;
         analyzeBtn.disabled = true;
+        scatterPlotToggle.disabled = true;
+        updateCompositeScatterPlot();
         if (!selectedRootKey || !sampleJsonContent) return;
         const targetArray = sampleJsonContent[selectedRootKey];
         if (Array.isArray(targetArray) && targetArray.length > 0 && typeof targetArray[0] === 'object') {
@@ -166,6 +281,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function handleYValueSelect(event) {
+        if (event.target.value) {
+            scatterPlotToggle.disabled = false;
+        } else {
+            scatterPlotToggle.disabled = true;
+        }
+        updateCompositeScatterPlot();
+    }
+
     function resetUI() {
         sampleJsonContent = null;
         rootObjectSelector.innerHTML = '';
@@ -173,6 +297,9 @@ document.addEventListener('DOMContentLoaded', () => {
         yValueSelector.innerHTML = '';
         yValueSelector.disabled = true;
         analyzeBtn.disabled = true;
+        scatterPlotToggle.disabled = true;
+        scatterPlotToggle.checked = false;
+        clearCompositeScatterPlot();
     }
 
     function findArrayKeys(jsonObj) {
@@ -275,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
         frechetWeightSlider.disabled = isLoading;
         dtwWeightSlider.disabled = isLoading;
         radioButtons.forEach(radio => radio.disabled = isLoading);
+        scatterPlotToggle.disabled = isLoading;
         if (isLoading) {
             progressBarContainer.classList.remove('hidden');
             updateProgressBar(0, 'Starting analysis...');

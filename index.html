@@ -54,8 +54,17 @@
                 </div>
             </section>
 
-            <section class="canvas-container">
-                <canvas id="drawing-canvas" width="600" height="400"></canvas>
+            <section class="canvas-wrapper">
+                <div class="canvas-stack">
+                    <canvas id="composite-scatter-plot" class="hidden"></canvas>
+                    <canvas id="drawing-canvas"></canvas>
+                </div>
+                <div class="canvas-options">
+                    <label>
+                        <input type="checkbox" id="scatter-plot-toggle">
+                        Display Point Cloud for All Data
+                    </label>
+                </div>
             </section>
         </div>
 

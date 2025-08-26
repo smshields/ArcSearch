@@ -16,6 +16,7 @@ body {
     display: flex;
     gap: 30px;
     flex-wrap: wrap;
+    align-items: stretch;
 }
 
 .controls {
@@ -27,14 +28,34 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.canvas-container {
+.canvas-wrapper {
     flex: 2;
+    display: flex;
+    flex-direction: column;
+    min-width: 400px;
 }
 
-#drawing-canvas {
-    border: 1px solid #ccc;
+.canvas-stack {
+    flex-grow: 1;
+    position: relative;
     background-color: #fff;
+    border: 1px solid #ccc;
     border-radius: 8px;
+}
+
+#composite-scatter-plot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.canvas-options {
+    padding-top: 10px;
+    text-align: center;
 }
 
 select,
@@ -100,6 +121,16 @@ select:disabled {
     display: flex;
     flex-direction: column;
     gap: 5px;
+}
+
+#weights-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 4px;
 }
 
 .results-area table {
