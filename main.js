@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const setCanvasSize = () => {
             const width = canvasContainer.clientWidth;
-            const height = canvasContainer.clientHeight;
+            const height = canvasContainer.clientWidth * .75;
             
             fabricCanvas.setDimensions({ width, height });
             

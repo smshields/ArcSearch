@@ -43,6 +43,12 @@ body {
     border-radius: 8px;
 }
 
+.file-load-container {
+    margin-right: 20px;
+}
+
+
+
 #composite-scatter-plot {
     position: absolute;
     top: 0;
@@ -54,8 +60,20 @@ body {
 }
 
 .canvas-options {
-    padding-top: 10px;
+    padding-bottom: 10px;
     text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+select{
+    font-weight: bold;
+    font-size: 12px;
+}
+
+button{
+       font-weight: bold;
+    font-size: 16px; 
 }
 
 select,
@@ -160,6 +178,10 @@ select:disabled {
     cursor: pointer;
 }
 
+.center-content{
+    text-align: center;
+}
+
 .modal {
     position: fixed;
     z-index: 100;
@@ -182,7 +204,6 @@ select:disabled {
     width: 80%;
     max-width: 1000px;
     min-height: 500px;
-    border-radius: 8px;
     position: relative;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
 }
@@ -202,3 +223,21 @@ select:disabled {
     text-decoration: none;
     cursor: pointer;
 }
+
+header {
+    text-align: center;
+    background-color: white;
+
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1),0 6px 20px 0 rgba(0,0,0,0.1);
+    border-radius: 8px;
+    border: 3px solid black;
+}
+
+.border-style {
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1),0 6px 20px 0 rgba(0,0,0,0.1);
+    border-radius: 8px;
+    border: 3px solid black;
+}
+

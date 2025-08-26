@@ -8,35 +8,41 @@
 </head>
 <body>
     <header>
-        <h1>Playtrace Analysis Tool</h1>
+        <h1>Playtrace Arc Search</h1>
     </header>
 
     <main class="container">
         <div class="controls-and-canvas">
-            <section class="controls">
-                <h2>Controls</h2>
-                <p>1. Select your 'simulationfiles' directory.</p>
-                <input type="file" id="file-input" webkitdirectory directory>
+            <section class="controls border-style">
+                <div class="center-content">
+                    <h2>Search Configuration:</h2>
+                </div>
+                <p>Use the inputs below to load playtraces and select which playtrace properties will be used for PAS. You can view a global point cloud after loading data to visualize overall data trends. You must draw an arc on the right to perform a search. </p>
 
-                <p>2. Select the root object containing the data array.</p>
-                <select id="root-object-selector" disabled></select>
+                <h3>1. Load Data:</h3>
+                <div class="file-load-container">
+                    <input type="file" id="file-input" title="Select directory containing playtraces. Folder structure should be: 'playtraces/seed/data.json'." webkitdirectory directory>
+                </div>
 
-                <p>3. Select the Y-value to analyze.</p>
-                <select id="y-value-selector" disabled></select>
+                <h3>2. Select X-Axis:</h3>
+                <select id="root-object-selector" title="Select the property in the JSON that will contain all y-values. It should be an array of objects that have the same structure. The index of the object in the array represents the X value, while the contents of each object contain the Y values available for that X value." disabled></select>
 
-                <p>4. Draw your desired graph shape below.</p>
+                <h3>3. Select Y-Axis:</h3>
+                <select id="y-value-selector" title="Select the property within the objects in the array that will represent the Y values for the playtrace. You can select any value that is a number. This property must be defined in each object and must always be a number." disabled></select>
+
+                <h3>4. Draw Desired Arc on the Right:</h3>
                 <div class="drawing-controls">
-                    <button id="clear-canvas-btn">Clear All</button>
+                    <button title="This button will clear your current drawn arc. Drawing multiple arcs will also clear prior arcs if there is overlap." id="clear-canvas-btn">Clear</button>
                 </div>
                 
                 <hr>
                 
                 <div class="analysis-controls">
                     <div class="radio-group">
-                        <label>Analysis Method:</label>
-                        <label><input type="radio" name="analysis-method" value="frechet" checked> Overall Shape (Fréchet)</label>
-                        <label><input type="radio" name="analysis-method" value="dtw"> Sequence (DTW)</label>
-                        <label><input type="radio" name="analysis-method" value="combined"> Combined</label>
+                        <label><div class="center-content"><h2>Search Method:</h2></div><p>Fréchet searching favors scoring according to the overall trend of the graph, potentially missing some arc details. Dynamic Time Warping (DTW) favors scoring according to shape details (e.g., matching valleys/peaks) but cares less about where details occur.</p></label>
+                        <label><input type="radio" name="analysis-method" value="frechet" checked> Overall Trend (Fréchet)</label>
+                        <label><input type="radio" name="analysis-method" value="dtw"> Shape Details (DTW)</label>
+                        <label><input type="radio" name="analysis-method" value="combined"> Weighted Combination </label>
                     </div>
 
                     <div id="weights-container" class="hidden">
@@ -50,26 +56,37 @@
                     <label for="sensitivity-slider">Sensitivity: <span id="sensitivity-value">100</span></label>
                     <input type="range" id="sensitivity-slider" min="30" max="300" value="100" step="10">
 
-                    <button id="analyze-btn" disabled>Analyze</button>
+                    <hr>
+
+                    <button title="Click button to run analysis. Will be enabled once data is correctly loaded and desired arc is drawn." id="analyze-btn" disabled>Perform Arc Search</button>
+                    <p>A list of results will be displayed below. You may have to scroll down to view all results. Any individual item can be selected to inspect the specific playtrace against your desired arc. Green represents a good match while red represents a poor match.</p>
                 </div>
             </section>
 
-            <section class="canvas-wrapper">
+            <section class="canvas-wrapper border-style">
+
                 <div class="canvas-stack">
+                    <div class="center-content">
+                        <h2>Arc Drawing Canvas</h2>
+                    </div>
+                    <hr>
                     <canvas id="composite-scatter-plot" class="hidden"></canvas>
                     <canvas id="drawing-canvas"></canvas>
+                    <hr>
+                    <div class="canvas-options">
+                        <label>
+                            <input type="checkbox" id="scatter-plot-toggle"> Display Point Cloud for All Data
+                        </label>
+                    </div>
                 </div>
-                <div class="canvas-options">
-                    <label>
-                        <input type="checkbox" id="scatter-plot-toggle">
-                        Display Point Cloud for All Data
-                    </label>
-                </div>
+
             </section>
         </div>
 
-        <section class="results-area">
-            <h2>Analysis Results</h2>
+        <section class="results-area border-style">
+            <div class="center-content">
+                <h2>Analysis Results</h2>
+            </div>
             <div id="progress-bar-container" class="hidden">
                 <div id="progress-bar"></div>
                 <span id="progress-text"></span>
